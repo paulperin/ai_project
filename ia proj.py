@@ -1,50 +1,57 @@
 from transformers import MarianMTModel, MarianTokenizer
 
-def traduire_texte_multilangues(texte, langue_source, langues_cibles):
+def translate_text_multilanguages(text, language_source, languages_targets):
     """
-    Traduit un texte dans plusieurs langues cibles.
+    translate a text in several target languages.
     
-    :param texte: Texte à traduire.
-    :param langue_source: Code de la langue source (ex : "fr" pour français).
-    :param langues_cibles: Liste des codes de langues cibles (ex : ["en", "es", "de"]).
-    :return: Dictionnaire contenant les traductions pour chaque langue cible.
-    langues dispo : en,fr,es,de,da,ru,he,sw,zh
+    :param text: text to translate.
+    :param language_source: Source language code (e.g. “fr” for french).
+    :param languages_targets: List of target language codes (e.g. [“en”, “es”, “de”]).
+    :return: Dictionary containing translations for each target language.
     """
-    traductions = {}
+
+    translations = {}
     
-    for langue_cible in langues_cibles:
-        # Construire le nom du modèle pour les langues spécifiées
-        modele_nom = f"Helsinki-NLP/opus-mt-{langue_source}-{langue_cible}"
+    for language_target in languages_targets:
+        # Construire le nom du modèle pour les languages spécifiées
+        modele_nom = f"Helsinki-NLP/opus-mt-{source_language}-{language_target}" 
         
         # Charger le tokenizer et le modèle
         tokenizer = MarianTokenizer.from_pretrained(modele_nom)
         model = MarianMTModel.from_pretrained(modele_nom)
         
-        # Préparer le texte pour le modèle
-        tokens = tokenizer(texte, return_tensors="pt", truncation=True, padding=True)
+        # Préparer le text pour le modèle
+        tokens = tokenizer(text, return_tensors="pt", truncation=True, padding=True)
         
-        # Traduire le texte
-        traduction = model.generate(**tokens)
+        # Traduire le text
+        translation = model.generate(**tokens)
         
         # Décoder le résultat
-        texte_traduit = tokenizer.decode(traduction[0], skip_special_tokens=True)
+        text_translate = tokenizer.decode(translation[0], skip_special_tokens=True)
         
         # Ajouter la traduction au dictionnaire
-        traductions[langue_cible] = texte_traduit
+        translations[language_target] = text_translate
     
-    return traductions
+    return translations
 
+# Boucle principale
+print("Welcome to the AI Translator!")
+while True:
+    # Entrées utilisateur
+    text_source = input("\nWrite your text to be translated: ")
+    source_language = input("Enter the language in which your text is written (e.g., 'fr' for French): ")
+    languages_targets = input("Enter the languages into which you wish to translate your text, separated by commas (e.g., 'en,es,de'): ").split(',')
 
-# Entrées utilisateur
-print("Welcome to the AI traductor !")
-texte_source = input("Write your text to be translated : ")
-langue_source = input("Enter the language in which your text is written (e.g. 'fr' for French) : ")
-langues_cibles = input("Enter the languages into which you wish to translate your text, separated by commas (e.g. 'en,es,de') : ").split(',')
+    # Effectuer les traductions
+    translations = translate_text_multilanguages(text_source, source_language.strip(), [language.strip() for language in languages_targets])
 
-# Effectuer les traductions
-traductions = traduire_texte_multilangues(texte_source, langue_source.strip(), [langue.strip() for langue in langues_cibles])
-
-# Afficher les résultats
-print("\nHere's your text translated into your chosen language(s) :")
-for langue, texte_traduit in traductions.items():
-    print(f"- {langue} : {texte_traduit}")
+    # Afficher les résultats
+    print("\nHere's your text translated into your chosen language(s):")
+    for language, text_translate in translations.items():
+        print(f"- {language} : {text_translate}")
+    
+    # Demander si l'utilisateur veut refaire une traduction
+    next_to_continue = input("\nDo you want to translate another text? (yes/no): ").strip().lower()
+    if next_to_continue not in ['yes', 'y']:
+        print("Goodbye! Thank you for using the AI Translator.")
+        break
